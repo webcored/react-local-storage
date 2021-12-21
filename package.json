@@ -1,0 +1,30 @@
+{
+  "name": "react-local-storage",
+  "version": "1.0.0",
+  "description": "React local storage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webcored/react-local-storage.git"
+  },
+  "keywords": [
+    "react-local-storage"
+  ],
+  "author": "Prakash Chokalingam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/webcored/react-local-storage/issues"
+  },
+  "homepage": "https://github.com/webcored/react-local-storage#readme",
+  "dependencies": {
+    "typescript": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.37"
+  }
+}
