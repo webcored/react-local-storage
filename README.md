@@ -10,7 +10,12 @@ A stateful react hook for browser storage.
 
 ## Usage
 
-<small>components.js</small>
+##### sample app
+|javascript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
+| ------------- | ------------- |
+|typescript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
+
+<small>component.js</small>
 ```js
 const [user, userStorage] = useLocalStorage('user');
 
@@ -31,12 +36,6 @@ userStorage.update(...user, { name: 'new name' });
 ```
 </p>
 </details>
-
-##### sample apps
-|javascript| typescript |
-| ------------- | ------------- |
-| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark)  | [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark)| |
-
 
 ## Configurations
 
