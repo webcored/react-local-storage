@@ -1,22 +1,22 @@
-import { config } from './config';
-import { CustomDispatcher, ReactLocalStorage, Track } from './types';
+import { config } from './config'
+import { CustomDispatcher, ReactLocalStorage, Track } from './types'
 
 // to avoid this data in every class instance
 const react = () => {
-  if (!config.react) { throw new Error("Please provide the react instance"); }
-  return config.react;
+  if (!config.react) { throw new Error('Please provide the react instance') }
+  return config.react
 }
 
-const storage = () => config.storage || window.localStorage;
+const storage = () => config.storage || window.localStorage
 
-let track: Track | undefined = undefined;
-const defaultTrackVersion = 1;
+let track: Track | undefined
+const defaultTrackVersion = 1
 
 class ReactLocalStorageKlass {
-  constructor(key: string) {
-    this.key = key;
-    this.updateState = null;
-    this.storageConfig = { defaults: {} };
+  constructor (key: string) {
+    this.key = key
+    this.updateState = null
+    this.storageConfig = { defaults: {} }
   }
 
   // variables
@@ -28,106 +28,105 @@ class ReactLocalStorageKlass {
   /**
    * state dispatcher
    */
-  private updateState: React.Dispatch<any> | null;
+  private updateState: any;
 
   // methods
-  public init<T>(): [T, CustomDispatcher] {
-    const { storages } = config;
+  public init<T> (): [T, CustomDispatcher] {
+    const { storages } = config
 
-    const storageConfig = storages[this.key] as ReactLocalStorage<T>;
+    const storageConfig = storages[this.key] as ReactLocalStorage<T>
     if (!storageConfig) {
-      console.warn(`config definition for storage:${this.key} not found`);
+      console.warn(`config definition for storage:${this.key} not found`)
     }
 
     // cache config
-    this.storageConfig = storageConfig;
+    this.storageConfig = storageConfig
 
-    let keyName = this.getKeyName(this.key);
-    let stateValue: any;
+    const keyName = this.getKeyName(this.key)
+    let stateValue: any
 
-    const data = storage().getItem(keyName);
+    const data = storage().getItem(keyName)
 
     if (!data && storageConfig?.defaults) { // set default values if not exists
-      this.save(keyName, storageConfig?.defaults);
-      this.setTrack(this.key, storageConfig?.version);
-      stateValue = storageConfig?.defaults;
+      this.save(keyName, storageConfig?.defaults)
+      this.setTrack(this.key, storageConfig?.version)
+      stateValue = storageConfig?.defaults
     }
 
     // if data exists
     if (data) {
-      stateValue = this.toState(data);
+      stateValue = this.toState(data)
     }
 
     // check for migration
-    this.checkForMigration(stateValue);
+    this.checkForMigration(stateValue)
 
     // state
-    const useState = react().useState;
-    const [state, updateState] = useState(stateValue);
-    this.updateState = updateState;
+    const useState = react().useState
+    const [state, updateState] = useState(stateValue)
+    this.updateState = updateState
 
-    return [state, this.dispatcher.call(this)];
+    return [state, this.dispatcher()]
   }
 
-  public dispatcher(): CustomDispatcher {
+  public dispatcher (): CustomDispatcher {
     return {
       update: this.update.bind(this),
       reset: this.reset.bind(this),
-      remove: this.remove.bind(this),
+      remove: this.remove.bind(this)
     }
   }
 
-  private update(data: any) {
-    let keyName = this.getKeyName(this.key);
-    this.updateState && this.updateState(data);
-    this.save(keyName, data);
+  private update (data: any) {
+    const keyName = this.getKeyName(this.key)
+    this.updateState && this.updateState(data)
+    this.save(keyName, data)
   }
 
-  private reset() {
-    let keyName = this.getKeyName(this.key);
-    let defaultValue = this.storageConfig.defaults;
+  private reset () {
+    const keyName = this.getKeyName(this.key)
+    let defaultValue = this.storageConfig.defaults
     if (!defaultValue) {
-      console.warn(`Definition for storage:${this.key} not found`);
-      defaultValue = null;
+      console.warn(`Definition for storage:${this.key} not found`)
+      defaultValue = null
     }
-    this.updateState && this.updateState(defaultValue);
-    this.save(keyName, defaultValue);
+    this.updateState && this.updateState(defaultValue)
+    this.save(keyName, defaultValue)
   }
 
-
-  private remove() {
-    let keyName = this.getKeyName(this.key);
-    this.updateState && this.updateState(null);
-    storage().removeItem(keyName);
+  private remove () {
+    const keyName = this.getKeyName(this.key)
+    this.updateState && this.updateState(null)
+    storage().removeItem(keyName)
   }
 
   /**
    * converts key name with configured namespace & delimeter
    */
-  private getKeyName(key: string): string {
-    const { namespace, delimiter } = config;
-    return namespace ? `${namespace}${delimiter}${key}` : key;
+  private getKeyName (key: string): string {
+    const { namespace, delimiter } = config
+    return namespace ? `${namespace}${delimiter}${key}` : key
   }
 
   /**
    * converts the data  to supported local stoarge format
    */
-  private toStorage(data: any): any {
+  private toStorage (data: any): any {
     try {
-      return JSON.stringify(data);
+      return JSON.stringify(data)
     } catch (error) { // may be string or number
-      return data;
+      return data
     }
   }
 
   /**
    * converts the data to state format
    */
-  private toState(data: any): any {
+  private toState (data: any): any {
     try {
-      return JSON.parse(data);
+      return JSON.parse(data)
     } catch (error) { // may be string or number
-      return data;
+      return data
     }
   }
 
@@ -135,64 +134,64 @@ class ReactLocalStorageKlass {
    * Update data to local storage
    * @param data
    */
-  private save(keyName: string, data: any) {
-    let proccessedData = this.toStorage(data);
-    storage().setItem(keyName, proccessedData);
+  private save (keyName: string, data: any) {
+    const proccessedData = this.toStorage(data)
+    storage().setItem(keyName, proccessedData)
   }
 
   // migrate
-  private checkForMigration(currentValue: any) {
-    let track = this.getTrack();
+  private checkForMigration (currentValue: any) {
+    const track = this.getTrack()
 
-    if(!track[this.key]) { // set default version
-      this.setTrack(this.key);
+    if (!track[this.key]) { // set default version
+      this.setTrack(this.key)
     } else if (track[this.key].v !== (this.storageConfig?.version || defaultTrackVersion)) { // migrate if conflict
-      const migrationCallback = this.storageConfig?.migration;
+      const migrationCallback = this.storageConfig?.migration
       if (!migrationCallback) {
-        console.error(`Migration method not found for key:${this.key}`);
-        return;
+        console.error(`Migration method not found for key:${this.key}`)
+        return
       }
 
-      const updatedValue = migrationCallback(currentValue, this.storageConfig.defaults);
+      const updatedValue = migrationCallback(currentValue, this.storageConfig.defaults)
       if (!updatedValue) {
-        console.error('Expected return value from the callback');
+        console.error('Expected return value from the callback')
       } else {
-        this.save(this.getKeyName(this.key), updatedValue); // save migrated value
+        this.save(this.getKeyName(this.key), updatedValue) // save migrated value
       }
 
-      this.setTrack(this.key, this.storageConfig?.version); // update version
+      this.setTrack(this.key, this.storageConfig?.version) // update version
     }
   }
 
-  private getTrackName(): string {
-    const { namespace, delimiter } = config;
-    return namespace ? `${namespace}${delimiter}track` : 'track';
+  private getTrackName (): string {
+    const { namespace, delimiter } = config
+    return namespace ? `${namespace}${delimiter}track` : 'track'
   }
 
-  private getTrack(): Track {
+  private getTrack (): Track {
     if (!track) {
-      let trackName = this.getTrackName();
-      const trackData = storage().getItem(trackName);
-      return this.toState(trackData) || {};
+      const trackName = this.getTrackName()
+      const trackData = storage().getItem(trackName)
+      return this.toState(trackData) || {}
     }
 
-    return track;
+    return track
   }
 
-  private setTrack(key: string, version: number = defaultTrackVersion) {
-    let trackName = this.getTrackName();
-    let track = this.getTrack();
-    track[key] = { v: version };
-    this.save(trackName, track);
+  private setTrack (key: string, version: number = defaultTrackVersion) {
+    const trackName = this.getTrackName()
+    const track = this.getTrack()
+    track[key] = { v: version }
+    this.save(trackName, track)
   }
 }
 
 const useLocalStorage = <T>(key: string): [T, CustomDispatcher] => {
-  const reactLocalStorageKlass = new ReactLocalStorageKlass(key);
-  return reactLocalStorageKlass.init<T>();
+  const reactLocalStorageKlass = new ReactLocalStorageKlass(key)
+  return reactLocalStorageKlass.init<T>()
 }
 
 export {
   useLocalStorage,
   ReactLocalStorage
-};
+}
