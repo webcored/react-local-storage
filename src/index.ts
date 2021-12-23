@@ -64,8 +64,6 @@ class ReactLocalStorageKlass {
       const initKey = this.getKeyName('init')
       if (!initialized.init) { initialized[initKey] = [] }
       initialized[initKey].push(this.key)
-
-      console.log(initialized)
     }
 
     // if data exists

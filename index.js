@@ -41,7 +41,6 @@ class ReactLocalStorageKlass {
                 initialized[initKey] = [];
             }
             initialized[initKey].push(this.key);
-            console.log(initialized);
         }
         if (data) {
             stateValue = this.toState(data);
