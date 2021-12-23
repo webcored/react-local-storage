@@ -1,5 +1,5 @@
 import { config } from './config'
-import { CustomDispatcher, ReactLocalStorage, Track } from './types'
+import { CustomDispatcher, InitTrack, ReactLocalStorage, Track } from './types'
 
 // to avoid this data in every class instance
 const react = () => {
@@ -8,6 +8,11 @@ const react = () => {
 }
 
 const storage = () => config.storage || window.localStorage
+
+/**
+ * default initialization track
+ */
+const initialized: InitTrack = {}
 
 let track: Track | undefined
 const defaultTrackVersion = 1
@@ -45,12 +50,22 @@ class ReactLocalStorageKlass {
     const keyName = this.getKeyName(this.key)
     let stateValue: any
 
-    const data = storage().getItem(keyName)
+    // init track
+    const initKey = this.getKeyName('init')
+    if (!initialized[initKey]) { initialized[initKey] = [] }
 
-    if (!data && storageConfig?.defaults) { // set default values if not exists
+    const data = storage().getItem(keyName)
+    if (!data && !initialized[initKey].includes(this.key) && storageConfig?.defaults) { // set default values if not exists
       this.save(keyName, storageConfig?.defaults)
       this.setTrack(this.key, storageConfig?.version)
       stateValue = storageConfig?.defaults
+
+      // track initalization
+      const initKey = this.getKeyName('init')
+      if (!initialized.init) { initialized[initKey] = [] }
+      initialized[initKey].push(this.key)
+
+      console.log(initialized)
     }
 
     // if data exists
@@ -105,7 +120,7 @@ class ReactLocalStorageKlass {
    */
   private getKeyName (key: string): string {
     const { namespace, delimiter } = config
-    return namespace ? `${namespace}${delimiter}${key}` : key
+    return namespace ? `${namespace}${delimiter || '/'}${key}` : key
   }
 
   /**

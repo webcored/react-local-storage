@@ -1,4 +1,4 @@
-declare type ReactModule = typeof import("react");
+declare type ReactModule = typeof import('react');
 interface ReactLocalStorage<T> {
     defaults: T;
     version?: number;
@@ -23,4 +23,7 @@ interface Track {
         v: number;
     };
 }
-export { LocalStorageConfig, CustomDispatcher, ReactLocalStorage, Track };
+interface InitTrack {
+    [keyName: string]: string[];
+}
+export { LocalStorageConfig, CustomDispatcher, ReactLocalStorage, Track, InitTrack, ReactModule };

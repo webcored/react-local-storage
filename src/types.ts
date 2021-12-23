@@ -28,10 +28,15 @@ interface Track {
   }
 }
 
+interface InitTrack {
+  [keyName: string]: string[];
+}
+
 export {
   LocalStorageConfig,
   CustomDispatcher,
   ReactLocalStorage,
   Track,
+  InitTrack,
   ReactModule
 }

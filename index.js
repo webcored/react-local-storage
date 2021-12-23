@@ -4,12 +4,13 @@ exports.useLocalStorage = void 0;
 const config_1 = require("./config");
 const react = () => {
     if (!config_1.config.react) {
-        throw new Error("Please provide the react instance");
+        throw new Error('Please provide the react instance');
     }
     return config_1.config.react;
 };
 const storage = () => config_1.config.storage || window.localStorage;
-let track = undefined;
+const initialized = {};
+let track;
 const defaultTrackVersion = 1;
 class ReactLocalStorageKlass {
     constructor(key) {
@@ -24,13 +25,23 @@ class ReactLocalStorageKlass {
             console.warn(`config definition for storage:${this.key} not found`);
         }
         this.storageConfig = storageConfig;
-        let keyName = this.getKeyName(this.key);
+        const keyName = this.getKeyName(this.key);
         let stateValue;
+        const initKey = this.getKeyName('init');
+        if (!initialized[initKey]) {
+            initialized[initKey] = [];
+        }
         const data = storage().getItem(keyName);
-        if (!data && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
+        if (!data && !initialized[initKey].includes(this.key) && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
             this.save(keyName, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults);
             this.setTrack(this.key, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.version);
             stateValue = storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults;
+            const initKey = this.getKeyName('init');
+            if (!initialized.init) {
+                initialized[initKey] = [];
+            }
+            initialized[initKey].push(this.key);
+            console.log(initialized);
         }
         if (data) {
             stateValue = this.toState(data);
@@ -39,22 +50,22 @@ class ReactLocalStorageKlass {
         const useState = react().useState;
         const [state, updateState] = useState(stateValue);
         this.updateState = updateState;
-        return [state, this.dispatcher.call(this)];
+        return [state, this.dispatcher()];
     }
     dispatcher() {
         return {
             update: this.update.bind(this),
             reset: this.reset.bind(this),
-            remove: this.remove.bind(this),
+            remove: this.remove.bind(this)
         };
     }
     update(data) {
-        let keyName = this.getKeyName(this.key);
+        const keyName = this.getKeyName(this.key);
         this.updateState && this.updateState(data);
         this.save(keyName, data);
     }
     reset() {
-        let keyName = this.getKeyName(this.key);
+        const keyName = this.getKeyName(this.key);
         let defaultValue = this.storageConfig.defaults;
         if (!defaultValue) {
             console.warn(`Definition for storage:${this.key} not found`);
@@ -64,13 +75,13 @@ class ReactLocalStorageKlass {
         this.save(keyName, defaultValue);
     }
     remove() {
-        let keyName = this.getKeyName(this.key);
+        const keyName = this.getKeyName(this.key);
         this.updateState && this.updateState(null);
         storage().removeItem(keyName);
     }
     getKeyName(key) {
         const { namespace, delimiter } = config_1.config;
-        return namespace ? `${namespace}${delimiter}${key}` : key;
+        return namespace ? `${namespace}${delimiter || '/'}${key}` : key;
     }
     toStorage(data) {
         try {
@@ -89,12 +100,12 @@ class ReactLocalStorageKlass {
         }
     }
     save(keyName, data) {
-        let proccessedData = this.toStorage(data);
+        const proccessedData = this.toStorage(data);
         storage().setItem(keyName, proccessedData);
     }
     checkForMigration(currentValue) {
         var _a, _b, _c;
-        let track = this.getTrack();
+        const track = this.getTrack();
         if (!track[this.key]) {
             this.setTrack(this.key);
         }
@@ -120,15 +131,15 @@ class ReactLocalStorageKlass {
     }
     getTrack() {
         if (!track) {
-            let trackName = this.getTrackName();
+            const trackName = this.getTrackName();
             const trackData = storage().getItem(trackName);
             return this.toState(trackData) || {};
         }
         return track;
     }
     setTrack(key, version = defaultTrackVersion) {
-        let trackName = this.getTrackName();
-        let track = this.getTrack();
+        const trackName = this.getTrackName();
+        const track = this.getTrack();
         track[key] = { v: version };
         this.save(trackName, track);
     }

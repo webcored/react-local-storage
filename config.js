@@ -4,7 +4,7 @@ exports.config = exports.localStorageConfig = void 0;
 let config = {
     namespace: '',
     delimiter: '',
-    storages: {},
+    storages: {}
 };
 exports.config = config;
 const localStorageConfig = (storageConfig) => {
