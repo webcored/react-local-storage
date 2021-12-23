@@ -2,6 +2,8 @@
 
 A stateful react hook for browser storage.
 
+[![build](https://github.com/webcored/react-local-storage/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/webcored/react-local-storage/actions/workflows/build.yml)
+
 ## Why?
 
 * Configurable
@@ -10,12 +12,7 @@ A stateful react hook for browser storage.
 
 ## Usage
 
-##### sample app
-|javascript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
-| ------------- | ------------- |
-|typescript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
-
-<small>component.js</small>
+<small>component.jsx</small>
 ```js
 const [user, userStorage] = useLocalStorage('user');
 
@@ -36,6 +33,20 @@ userStorage.update(...user, { name: 'new name' });
 ```
 </p>
 </details>
+
+### sample app
+|javascript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
+| ------------- | ------------- |
+
+
+<details><summary>typescript</summary>
+<p>
+
+|typescript| [![Edit react-local-storage](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vy14jywyl7?fontsize=14&hidenavigation=1&theme=dark) |
+| ------------- | ------------- |
+</p>
+</details>
+
 
 ## Configurations
 
