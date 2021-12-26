@@ -1,5 +1,7 @@
-import { config } from './config'
-import { CustomDispatcher, InitTrack, ReactLocalStorage, Track } from './types'
+import configurationsMethods, { config } from './config'
+import { CustomDispatcher, InitializedTrack, ReactLocalStorage, Track } from './types'
+
+const { storageConfig, storageKeyConfig } = configurationsMethods
 
 // to avoid this data in every class instance
 const react = () => {
@@ -10,9 +12,9 @@ const react = () => {
 const storage = () => config.storage || window.localStorage
 
 /**
- * default initialization track
+ * tracker flags to avoid setting defaults on re-render
  */
-const initialized: InitTrack = {}
+const initalized: InitializedTrack = {}
 
 let track: Track | undefined
 const defaultTrackVersion = 1
@@ -50,20 +52,17 @@ class ReactLocalStorageKlass {
     const keyName = this.getKeyName(this.key)
     let stateValue: any
 
-    // init track
-    const initKey = this.getKeyName('init')
-    if (!initialized[initKey]) { initialized[initKey] = [] }
+    const initKey = this.getInitKey()
+    if (!initalized[initKey]) { initalized[initKey] = [] }
+    const isIntialized = initalized[initKey].includes(this.key)
 
     const data = storage().getItem(keyName)
-    if (!data && !initialized[initKey].includes(this.key) && storageConfig?.defaults) { // set default values if not exists
+
+    // set default values if data not exists
+    if (!data && !isIntialized && storageConfig?.defaults) {
       this.save(keyName, storageConfig?.defaults)
       this.setTrack(this.key, storageConfig?.version)
       stateValue = storageConfig?.defaults
-
-      // track initalization
-      const initKey = this.getKeyName('init')
-      if (!initialized.init) { initialized[initKey] = [] }
-      initialized[initKey].push(this.key)
     }
 
     // if data exists
@@ -72,12 +71,17 @@ class ReactLocalStorageKlass {
     }
 
     // check for migration
-    this.checkForMigration(stateValue)
+    !isIntialized && this.checkForMigration(stateValue)
 
     // state
     const useState = react().useState
     const [state, updateState] = useState(stateValue)
     this.updateState = updateState
+
+    // init flag
+    if (!isIntialized) {
+      (initalized[initKey] as any).push(this.key)
+    }
 
     return [state, this.dispatcher()]
   }
@@ -94,6 +98,7 @@ class ReactLocalStorageKlass {
     const keyName = this.getKeyName(this.key)
     this.updateState && this.updateState(data)
     this.save(keyName, data)
+    this.setTrack(this.key, this.storageConfig.version)
   }
 
   private reset () {
@@ -105,12 +110,16 @@ class ReactLocalStorageKlass {
     }
     this.updateState && this.updateState(defaultValue)
     this.save(keyName, defaultValue)
+    this.setTrack(this.key, this.storageConfig.version)
   }
 
   private remove () {
     const keyName = this.getKeyName(this.key)
-    this.updateState && this.updateState(null)
     storage().removeItem(keyName)
+    this.removeTrack(this.key)
+
+    // update state
+    this.updateState && this.updateState(null)
   }
 
   /**
@@ -176,9 +185,9 @@ class ReactLocalStorageKlass {
     }
   }
 
+  // track
   private getTrackName (): string {
-    const { namespace, delimiter } = config
-    return namespace ? `${namespace}${delimiter}track` : 'track'
+    return this.getKeyName('track')
   }
 
   private getTrack (): Track {
@@ -191,11 +200,32 @@ class ReactLocalStorageKlass {
     return track
   }
 
-  private setTrack (key: string, version: number = defaultTrackVersion) {
+  private setTrack (key: string, version: number = defaultTrackVersion, setOnFalse: boolean = false) {
     const trackName = this.getTrackName()
     const track = this.getTrack()
-    track[key] = { v: version }
-    this.save(trackName, track)
+
+    const updateTrack = () => {
+      track[this.key] = { v: version }
+      this.save(trackName, track)
+    }
+
+    // set only if deleted
+    if (setOnFalse && !track[this.key]) {
+      updateTrack()
+    } else {
+      updateTrack()
+    }
+  }
+
+  private removeTrack (key: string) {
+    const trackName = this.getTrackName()
+    const track = this.getTrack()
+    delete track[key]
+    this.save(trackName, Object.assign(track))
+  }
+
+  private getInitKey () {
+    return this.getKeyName('init')
   }
 }
 
@@ -206,5 +236,7 @@ const useLocalStorage = <T>(key: string): [T, CustomDispatcher] => {
 
 export {
   useLocalStorage,
+  storageConfig,
+  storageKeyConfig,
   ReactLocalStorage
 }

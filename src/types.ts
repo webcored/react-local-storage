@@ -6,14 +6,14 @@ interface ReactLocalStorage<T> {
   migration?: (currentValue: any, defaultValue?: T) => T | any;
 }
 
-interface LocalStorageConfig {
+interface StorageConfig {
   storages: {
-    [keyName: string]: ReactLocalStorage<any>;
-  }
+    [keyName: string]: ReactLocalStorage<any>,
+  },
   storage?: Storage;
   namespace?: string;
   delimiter?: string;
-  react?: ReactModule;
+  react: ReactModule | undefined;
 }
 
 interface CustomDispatcher {
@@ -28,15 +28,15 @@ interface Track {
   }
 }
 
-interface InitTrack {
+interface InitializedTrack {
   [keyName: string]: string[];
 }
 
 export {
-  LocalStorageConfig,
+  StorageConfig,
   CustomDispatcher,
   ReactLocalStorage,
   Track,
-  InitTrack,
+  InitializedTrack,
   ReactModule
 }

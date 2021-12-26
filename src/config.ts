@@ -1,20 +1,17 @@
-import { LocalStorageConfig } from './types'
+import { ReactLocalStorage, StorageConfig } from './types'
 
-/**
- * default config
- */
-let config: LocalStorageConfig = {
-  namespace: '',
-  delimiter: '',
-  storages: {}
-}
+let config: StorageConfig = { storages: {}, react: undefined }
 
-const localStorageConfig = (storageConfig: LocalStorageConfig) => {
+const storageConfig = (storageConfig: StorageConfig): StorageConfig => {
   config = Object.assign({}, config, storageConfig)
   return config
 }
 
-export {
-  localStorageConfig,
-  config
+const storageKeyConfig = <T>(keyConfig: ReactLocalStorage<T>) => keyConfig
+
+export { config } // to maintain the global ref
+
+export default {
+  storageConfig,
+  storageKeyConfig
 }

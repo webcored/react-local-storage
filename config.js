@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = exports.localStorageConfig = void 0;
-let config = {
-    namespace: '',
-    delimiter: '',
-    storages: {}
-};
+exports.config = void 0;
+let config = { storages: {}, react: undefined };
 exports.config = config;
-const localStorageConfig = (storageConfig) => {
+const storageConfig = (storageConfig) => {
     exports.config = config = Object.assign({}, config, storageConfig);
     return config;
 };
-exports.localStorageConfig = localStorageConfig;
+const storageKeyConfig = (keyConfig) => keyConfig;
+exports.default = {
+    storageConfig,
+    storageKeyConfig
+};

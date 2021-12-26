@@ -1,16 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 
-import { useLocalStorage } from '../../index'
-import { localStorageConfig } from '../../config'
+import { useLocalStorage, storageConfig } from '../../index'
 
 function App(props: any) {
   // config
   if (props.config) {
-    localStorageConfig({
-      react: React,
-      ...props.config,
-    });
+    storageConfig(props.config);
   }
 
   // get storage

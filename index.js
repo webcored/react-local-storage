@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useLocalStorage = void 0;
+exports.storageKeyConfig = exports.storageConfig = exports.useLocalStorage = void 0;
 const config_1 = require("./config");
+const { storageConfig, storageKeyConfig } = config_1.default;
+exports.storageConfig = storageConfig;
+exports.storageKeyConfig = storageKeyConfig;
 const react = () => {
     if (!config_1.config.react) {
         throw new Error('Please provide the react instance');
@@ -9,7 +12,7 @@ const react = () => {
     return config_1.config.react;
 };
 const storage = () => config_1.config.storage || window.localStorage;
-const initialized = {};
+const initalized = {};
 let track;
 const defaultTrackVersion = 1;
 class ReactLocalStorageKlass {
@@ -27,28 +30,27 @@ class ReactLocalStorageKlass {
         this.storageConfig = storageConfig;
         const keyName = this.getKeyName(this.key);
         let stateValue;
-        const initKey = this.getKeyName('init');
-        if (!initialized[initKey]) {
-            initialized[initKey] = [];
+        const initKey = this.getInitKey();
+        if (!initalized[initKey]) {
+            initalized[initKey] = [];
         }
+        const isIntialized = initalized[initKey].includes(this.key);
         const data = storage().getItem(keyName);
-        if (!data && !initialized[initKey].includes(this.key) && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
+        if (!data && !isIntialized && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
             this.save(keyName, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults);
             this.setTrack(this.key, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.version);
             stateValue = storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults;
-            const initKey = this.getKeyName('init');
-            if (!initialized.init) {
-                initialized[initKey] = [];
-            }
-            initialized[initKey].push(this.key);
         }
         if (data) {
             stateValue = this.toState(data);
         }
-        this.checkForMigration(stateValue);
+        !isIntialized && this.checkForMigration(stateValue);
         const useState = react().useState;
         const [state, updateState] = useState(stateValue);
         this.updateState = updateState;
+        if (!isIntialized) {
+            initalized[initKey].push(this.key);
+        }
         return [state, this.dispatcher()];
     }
     dispatcher() {
@@ -62,6 +64,7 @@ class ReactLocalStorageKlass {
         const keyName = this.getKeyName(this.key);
         this.updateState && this.updateState(data);
         this.save(keyName, data);
+        this.setTrack(this.key, this.storageConfig.version);
     }
     reset() {
         const keyName = this.getKeyName(this.key);
@@ -72,11 +75,13 @@ class ReactLocalStorageKlass {
         }
         this.updateState && this.updateState(defaultValue);
         this.save(keyName, defaultValue);
+        this.setTrack(this.key, this.storageConfig.version);
     }
     remove() {
         const keyName = this.getKeyName(this.key);
-        this.updateState && this.updateState(null);
         storage().removeItem(keyName);
+        this.removeTrack(this.key);
+        this.updateState && this.updateState(null);
     }
     getKeyName(key) {
         const { namespace, delimiter } = config_1.config;
@@ -125,8 +130,7 @@ class ReactLocalStorageKlass {
         }
     }
     getTrackName() {
-        const { namespace, delimiter } = config_1.config;
-        return namespace ? `${namespace}${delimiter}track` : 'track';
+        return this.getKeyName('track');
     }
     getTrack() {
         if (!track) {
@@ -136,11 +140,28 @@ class ReactLocalStorageKlass {
         }
         return track;
     }
-    setTrack(key, version = defaultTrackVersion) {
+    setTrack(key, version = defaultTrackVersion, setOnFalse = false) {
         const trackName = this.getTrackName();
         const track = this.getTrack();
-        track[key] = { v: version };
-        this.save(trackName, track);
+        const updateTrack = () => {
+            track[this.key] = { v: version };
+            this.save(trackName, track);
+        };
+        if (setOnFalse && !track[this.key]) {
+            updateTrack();
+        }
+        else {
+            updateTrack();
+        }
+    }
+    removeTrack(key) {
+        const trackName = this.getTrackName();
+        const track = this.getTrack();
+        delete track[key];
+        this.save(trackName, Object.assign(track));
+    }
+    getInitKey() {
+        return this.getKeyName('init');
     }
 }
 const useLocalStorage = (key) => {
