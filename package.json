@@ -1,6 +1,6 @@
 {
   "name": "@webcored/react-local-storage",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A stateful react hook for browser storage",
   "main": "index.js",
   "scripts": {
