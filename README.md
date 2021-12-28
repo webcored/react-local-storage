@@ -1,6 +1,6 @@
 <img src="https://webcored-assets.netlify.app/react-local-storage.png"  height="250px" />
 
-# React local storage
+# React Local Storage
 
 A stateful react hook for browser storage.
 
@@ -12,9 +12,9 @@ A stateful react hook for browser storage.
 
 ## Why?
 
-* Configurable
-* Defaults support
-* Versions & Migrations
+* [Configurable](https://github.com/webcored/react-local-storage#configurations)
+* [Defaults support](https://github.com/webcored/react-local-storage#defaults)
+* [Versions & Migrations](https://github.com/webcored/react-local-storage#versions--migrations)
 
 ## Usage
 
