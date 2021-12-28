@@ -7,14 +7,16 @@ exports.storageConfig = storageConfig;
 exports.storageKeyConfig = storageKeyConfig;
 const react = () => {
     if (!config_1.config.react) {
-        throw new Error('Please provide the react instance');
+        throw new Error('Please provide a react instance');
     }
     return config_1.config.react;
 };
 const storage = () => config_1.config.storage || window.localStorage;
-const initalized = {};
-let track;
+const storageTrack = {};
+let versionTrack;
 const defaultTrackVersion = 1;
+const trackKey = 'track';
+const initKey = 'init';
 class ReactLocalStorageKlass {
     constructor(key) {
         this.key = key;
@@ -27,31 +29,24 @@ class ReactLocalStorageKlass {
         if (!storageConfig) {
             console.warn(`config definition for storage:${this.key} not found`);
         }
+        if (!storageTrack[this.initKey]) {
+            storageTrack[this.initKey] = [];
+        }
+        const initialized = storageTrack[this.initKey].includes(this.key);
         this.storageConfig = storageConfig;
-        const keyName = this.getKeyName(this.key);
-        let stateValue;
-        const initKey = this.getInitKey();
-        if (!initalized[initKey]) {
-            initalized[initKey] = [];
-        }
-        const isIntialized = initalized[initKey].includes(this.key);
-        const data = storage().getItem(keyName);
-        if (!data && !isIntialized && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
-            this.save(keyName, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults);
+        const data = storage().getItem(this.keyName);
+        if (!data && !initialized && (storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults)) {
+            this.save(this.keyName, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults);
             this.setTrack(this.key, storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.version);
-            stateValue = storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults;
         }
-        if (data) {
-            stateValue = this.toState(data);
-        }
-        !isIntialized && this.checkForMigration(stateValue);
+        const stateValue = this.toState(data) || ((storageConfig === null || storageConfig === void 0 ? void 0 : storageConfig.defaults) || null);
+        !initialized && this.checkForMigration(stateValue);
         const useState = react().useState;
         const [state, updateState] = useState(stateValue);
         this.updateState = updateState;
-        if (!isIntialized) {
-            initalized[initKey].push(this.key);
-        }
-        return [state, this.dispatcher()];
+        const customDispatcher = this.dispatcher();
+        storageTrack[this.initKey].push(this.key);
+        return [state, customDispatcher];
     }
     dispatcher() {
         return {
@@ -61,31 +56,38 @@ class ReactLocalStorageKlass {
         };
     }
     update(data) {
-        const keyName = this.getKeyName(this.key);
+        var _a;
         this.updateState && this.updateState(data);
-        this.save(keyName, data);
-        this.setTrack(this.key, this.storageConfig.version);
+        this.save(this.keyName, data);
+        this.setTrack(this.key, (_a = this.storageConfig) === null || _a === void 0 ? void 0 : _a.version);
     }
     reset() {
-        const keyName = this.getKeyName(this.key);
-        let defaultValue = this.storageConfig.defaults;
+        var _a, _b;
+        const defaultValue = ((_a = this.storageConfig) === null || _a === void 0 ? void 0 : _a.defaults) || null;
         if (!defaultValue) {
-            console.warn(`Definition for storage:${this.key} not found`);
-            defaultValue = null;
+            this.noDefinitionWaring();
         }
         this.updateState && this.updateState(defaultValue);
-        this.save(keyName, defaultValue);
-        this.setTrack(this.key, this.storageConfig.version);
+        this.save(this.keyName, defaultValue);
+        this.setTrack(this.key, (_b = this.storageConfig) === null || _b === void 0 ? void 0 : _b.version);
     }
     remove() {
-        const keyName = this.getKeyName(this.key);
-        storage().removeItem(keyName);
+        storage().removeItem(this.keyName);
         this.removeTrack(this.key);
         this.updateState && this.updateState(null);
     }
     getKeyName(key) {
         const { namespace, delimiter } = config_1.config;
         return namespace ? `${namespace}${delimiter || '/'}${key}` : key;
+    }
+    get keyName() {
+        return this.getKeyName(this.key);
+    }
+    get initKey() {
+        return this.getKeyName(initKey);
+    }
+    get trackKey() {
+        return this.getKeyName(trackKey);
     }
     toStorage(data) {
         try {
@@ -103,9 +105,9 @@ class ReactLocalStorageKlass {
             return data;
         }
     }
-    save(keyName, data) {
+    save(key, data) {
         const proccessedData = this.toStorage(data);
-        storage().setItem(keyName, proccessedData);
+        storage().setItem(key, proccessedData);
     }
     checkForMigration(currentValue) {
         var _a, _b, _c;
@@ -119,49 +121,35 @@ class ReactLocalStorageKlass {
                 console.error(`Migration method not found for key:${this.key}`);
                 return;
             }
-            const updatedValue = migrationCallback(currentValue, this.storageConfig.defaults);
-            if (!updatedValue) {
+            const migratedValue = migrationCallback(currentValue, this.storageConfig.defaults);
+            if (!migratedValue) {
                 console.error('Expected return value from the callback');
             }
             else {
-                this.save(this.getKeyName(this.key), updatedValue);
+                this.save(this.keyName, migratedValue);
             }
             this.setTrack(this.key, (_c = this.storageConfig) === null || _c === void 0 ? void 0 : _c.version);
         }
     }
-    getTrackName() {
-        return this.getKeyName('track');
-    }
     getTrack() {
-        if (!track) {
-            const trackName = this.getTrackName();
-            const trackData = storage().getItem(trackName);
+        if (!versionTrack) {
+            const trackData = storage().getItem(this.trackKey);
             return this.toState(trackData) || {};
         }
-        return track;
+        return versionTrack;
     }
-    setTrack(key, version = defaultTrackVersion, setOnFalse = false) {
-        const trackName = this.getTrackName();
+    setTrack(key, version = defaultTrackVersion) {
         const track = this.getTrack();
-        const updateTrack = () => {
-            track[this.key] = { v: version };
-            this.save(trackName, track);
-        };
-        if (setOnFalse && !track[this.key]) {
-            updateTrack();
-        }
-        else {
-            updateTrack();
-        }
+        track[this.key] = { v: version };
+        this.save(this.trackKey, track);
     }
     removeTrack(key) {
-        const trackName = this.getTrackName();
         const track = this.getTrack();
         delete track[key];
-        this.save(trackName, Object.assign(track));
+        this.save(this.trackKey, Object.assign(track));
     }
-    getInitKey() {
-        return this.getKeyName('init');
+    noDefinitionWaring() {
+        console.warn(`config definition for storage:${this.key} not found`);
     }
 }
 const useLocalStorage = (key) => {

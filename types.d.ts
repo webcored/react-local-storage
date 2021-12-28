@@ -18,12 +18,12 @@ interface CustomDispatcher {
     reset: () => any;
     remove: () => any;
 }
-interface Track {
+interface StorageTrack {
+    [keyName: string]: string[];
+}
+interface VersionTrack {
     [keyName: string]: {
         v: number;
     };
 }
-interface InitializedTrack {
-    [keyName: string]: string[];
-}
-export { StorageConfig, CustomDispatcher, ReactLocalStorage, Track, InitializedTrack, ReactModule };
+export { StorageConfig, CustomDispatcher, ReactLocalStorage, StorageTrack, VersionTrack, ReactModule };
