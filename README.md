@@ -16,6 +16,12 @@ A stateful react hook for browser storage.
 * [Defaults support](https://github.com/webcored/react-local-storage#defaults)
 * [Versions & Migrations](https://github.com/webcored/react-local-storage#versions--migrations)
 
+## Install
+
+```
+npm install @webcored/react-local-storage
+```
+
 ## Usage
 
 <small>component.jsx</small>
