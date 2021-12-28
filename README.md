@@ -20,11 +20,11 @@ A stateful react hook for browser storage.
 
 <small>component.jsx</small>
 ```js
+import { useLocalStorage } from "@webcored/react-local-storage";
+
 const [user, userStorage] = useLocalStorage('user');
 
 ....
-
-userStorage.update(...user, { name: 'new name' });
 ```
 
 <details><summary>typescript</summary>
@@ -34,13 +34,27 @@ userStorage.update(...user, { name: 'new name' });
 const [user, userStorage] = useLocalStorage<User>('user');
   
 ....
-
-userStorage.update(...user, { name: 'new name' });
 ```
 </p>
 </details>
 
-### sample app
+##### update 
+```
+userStorage.update({ ...user, name: 'new name' });
+```
+
+##### remove
+```
+userStorage.remove();
+```
+
+##### reset
+Reset's to the default value provided in the [key config](https://github.com/webcored/react-local-storage#defaults)
+```
+userStorage.reset();
+```
+
+## Sample app
  
 |<a href="https://github.com/webcored/react-local-storage-app-js" target="_blank">View on Github</a> | <a href="https://codesandbox.io/s/react-local-storage-js-di7we" target="_blank"><img src="https://codesandbox.io/static/img/play-codesandbox.svg"></a>|
 | ------------- | ------------- |
@@ -58,13 +72,12 @@ userStorage.update(...user, { name: 'new name' });
 
 ```js
 import React from 'react';
+
 import { user } from './storages/user';
 
-import { storageConfig } from "react-local-storage";
+import { storageConfig } from "@webcored/react-local-storage";
 
-...
-
-localStorageConfig({
+storageConfig({
   namespace: 'app',
   delimiter: '/'
   react: React
@@ -123,8 +136,8 @@ const user = storageKeyConfig<User>({
 
 #### Versions & Migrations
 
-If there is a schema change in the local storage or in the default value, the storage can be simply migrated to the latest version by **incrementing the version** of a key.
-It will trigger the **migrationcallback** when there is a diff with version.
+If there is a schema change required in the local storage or in its default value, the storage can be simply migrated to the latest version by **incrementing the version** of a key.
+It will trigger the given **migration** method when there is a conflict with version.
 
 
 ```js
@@ -162,9 +175,4 @@ const user = storageKeyConfig<User>({
 ```
 </p>
 </details>
-
-
-
-
-
 
