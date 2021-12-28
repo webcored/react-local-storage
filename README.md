@@ -68,7 +68,7 @@ userStorage.reset();
 <details><summary>typescript</summary>
 <p>
 
-|<a href="https://github.com/webcored/react-local-storage-app-ts" target="_blank">View on Github</a>| <a href="https://codesandbox.io/s/react-local-storage-ts-gwye1" target="_blank"><img src="https://codesandbox.io/static/img/play-codesandbox.svg"></a> |
+|<a href="https://github.com/webcored/react-local-storage-app-ts" target="_blank">View on Github</a>| <a href="https://codesandbox.io/s/react-local-storage-ts-gmmiy" target="_blank"><img src="https://codesandbox.io/static/img/play-codesandbox.svg"></a> |
 | ------------- | ------------- |
 </p>
 </details>
