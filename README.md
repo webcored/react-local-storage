@@ -143,7 +143,7 @@ const user = storageKeyConfig<User>({
 #### Versions & Migrations
 
 If there is a schema change required in the local storage or in its default value, the storage can be simply migrated to the latest version by **incrementing the version** of a key.
-It will trigger the given **migration** method when there is a conflict with version.
+It will invoke the given **migration** method when there is a conflict with version.
 
 
 ```js
