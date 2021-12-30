@@ -45,18 +45,18 @@ const [user, userStorage] = useLocalStorage<User>('user');
 </details>
 
 ##### update 
-```
+```js
 userStorage.update({ ...user, name: 'new name' });
 ```
 
 ##### remove
-```
+```js
 userStorage.remove();
 ```
 
 ##### reset
 Reset's to the default value provided in the [key config](https://github.com/webcored/react-local-storage#defaults)
-```
+```js
 userStorage.reset();
 ```
 
